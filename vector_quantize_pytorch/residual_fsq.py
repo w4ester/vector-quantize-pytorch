@@ -15,6 +15,7 @@ from vector_quantize_pytorch.finite_scalar_quantization import FSQ
 from einops import rearrange, repeat, reduce, pack, unpack
 
 from einx import get_at
+import secrets
 
 # helper functions
 
@@ -156,7 +157,7 @@ class ResidualFSQ(Module):
         # also prepare null indices
 
         if should_quantize_dropout:
-            rand = random.Random(rand_quantize_dropout_fixed_seed) if exists(rand_quantize_dropout_fixed_seed) else random
+            rand = secrets.SystemRandom().Random(rand_quantize_dropout_fixed_seed) if exists(rand_quantize_dropout_fixed_seed) else random
 
             rand_quantize_dropout_index = rand.randrange(self.quantize_dropout_cutoff_index, num_quant)
 
@@ -262,7 +263,7 @@ class GroupedResidualFSQ(Module):
 
         forward_kwargs = dict(
             return_all_codes = return_all_codes,
-            rand_quantize_dropout_fixed_seed = random.randint(0, int(1e7))
+            rand_quantize_dropout_fixed_seed = secrets.SystemRandom().randint(0, int(1e7))
         )
 
         # invoke residual vq on each group
