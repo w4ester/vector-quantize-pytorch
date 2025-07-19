@@ -16,6 +16,7 @@ from vector_quantize_pytorch.vector_quantize_pytorch import VectorQuantize
 from einops import rearrange, repeat, reduce, pack, unpack
 
 from einx import get_at
+import secrets
 
 # helper functions
 
@@ -167,13 +168,13 @@ class ResidualVQ(Module):
 
             if exists(rand_quantize_dropout_fixed_seed):
                 # seed is manually passed in
-                rand = random.Random(rand_quantize_dropout_fixed_seed)
+                rand = secrets.SystemRandom().Random(rand_quantize_dropout_fixed_seed)
 
             elif is_distributed():
                 # in distributed environment, synchronize a random seed value if not given
-                t = torch.tensor(random.randrange(10_000))
+                t = torch.tensor(secrets.SystemRandom().randrange(10_000))
                 dropout_seed = dist.all_reduce(t).item()
-                rand = random.Random(dropout_seed)
+                rand = secrets.SystemRandom().Random(dropout_seed)
 
             else:
                 rand = random
@@ -314,7 +315,7 @@ class GroupedResidualVQ(Module):
             sample_codebook_temp = sample_codebook_temp,
             mask = mask,
             freeze_codebook = freeze_codebook,
-            rand_quantize_dropout_fixed_seed = random.randint(0, int(1e7))
+            rand_quantize_dropout_fixed_seed = secrets.SystemRandom().randint(0, int(1e7))
         )
 
         # invoke residual vq on each group
